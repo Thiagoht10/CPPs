@@ -2,9 +2,9 @@ CXX = c++
 
 FLAGS = -Wall -Wextra -Werror -std=c++98
 
-NAME = megaphone
+NAME = phonebook
 
-SRC = megaphone.cpp
+SRC = Contact.cpp PhoneBook.cpp main.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
