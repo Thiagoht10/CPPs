@@ -17,7 +17,15 @@ int main(void)
         {
             if(!phone_book.addContact())
             {
-                std::cout << "\nError to add contact\n";
+                std::cout << RED << "\nError to add contact\n" << RESET;
+                break ;
+            }
+        }
+        else if (option == "SEARCH")
+        {
+            if(!phone_book.searchContact())
+            {
+                std::cout << RED << "\nError to search contacts\n" << RESET;
                 break ;
             }
         }
