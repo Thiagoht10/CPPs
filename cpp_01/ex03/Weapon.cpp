@@ -5,10 +5,9 @@ Weapon::Weapon(const std::string &type)
     this->type = type;
 }
 
-std::string Weapon::getType() const
+const std::string& Weapon::getType() const
 {
-    const std::string& refType = type;
-    return (refType);
+    return (type);
 }
 
 void    Weapon::setType(const std::string &type)

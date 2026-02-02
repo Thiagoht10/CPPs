@@ -4,6 +4,8 @@ FLAGS = -Wall -Werror -Wextra -std=c++98
 
 NAME = unnecessaryViolence
 
+ZIP = unnecessaryViolence.zip
+
 REMOVE = rm -rf
 
 SRC = Weapon.cpp HumanA.cpp HumanB.cpp main.cpp
@@ -23,6 +25,10 @@ clean:
 
 fclean: clean
 	$(REMOVE) $(NAME)
+	$(REMOVE) $(ZIP)
+
+zip: fclean
+	zip -r $(ZIP) .
 
 re: fclean all
 
