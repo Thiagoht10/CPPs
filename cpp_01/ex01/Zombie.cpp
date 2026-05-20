@@ -9,7 +9,7 @@ void    Zombie::setName(const std::string &name)
 
 Zombie::~Zombie()
 {
-    std::cout << name << ": Zombie destroited\n";
+    std::cout << name << ": Zombie destroyed\n";
 }
 
 void    Zombie::announce(void)
