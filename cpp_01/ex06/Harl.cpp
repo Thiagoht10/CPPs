@@ -2,7 +2,7 @@
 
 Harl::Harl(const std::string& level) 
 {
-    _level = level;
+    this->_level = level;
 }
 
 void    Harl::debug(void)

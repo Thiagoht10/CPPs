@@ -64,7 +64,9 @@ bool    Sed::replaceWords(void)
             start = pos + s1.length();
         }
         result += line.substr(start);
-        out << result << "\n";
+        out << result;
+        if(!in.eof())
+            out << '\n';
     }
     return (true);
 }
