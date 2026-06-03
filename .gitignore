@@ -1,0 +1,22 @@
+# Object files
+*.o
+
+# Build executables
+cpp_00/ex00/megaphone
+cpp_00/ex01/phonebook
+cpp_01/ex00/BraiiiiiiinnnzzzZ
+cpp_01/ex01/moarBrainz
+cpp_01/ex02/hiThisIsBrain
+cpp_01/ex03/unnecessaryViolence
+cpp_01/ex04/sed_is_for_losers
+cpp_01/ex05/harl_2
+cpp_01/ex06/harlFilter
+cpp_02/ex00/a.out
+cpp_02/ex01/a.out
+cpp_02/ex02/a.out
+cpp_03/ex00/a.out
+cpp_03/ex01/a.out
+cpp_03/ex02/a.out
+cpp_03/ex03/a.out
+cpp_04/ex00/a.out
+cpp_04/ex01/a.out
