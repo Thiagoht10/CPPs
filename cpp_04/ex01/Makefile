@@ -4,7 +4,8 @@ NAME = a.out
 
 FLAGS = -Wall -Werror -Wextra -std=c++98
 
-SRC = Animal.cpp Cat.cpp Dog.cpp WrongAnimal.cpp WrongCat.cpp main.cpp
+SRC = Animal.cpp Cat.cpp Dog.cpp WrongAnimal.cpp WrongCat.cpp \
+Brain.cpp main.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
