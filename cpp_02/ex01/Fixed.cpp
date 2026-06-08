@@ -24,7 +24,7 @@ Fixed& Fixed::operator=(const Fixed& other)
 Fixed::Fixed(const int value)
 {
     std::cout << "Int constructor called\n";
-    _value = value << _fractionalBits;
+    _value = value * (1 << _fractionalBits);
 }
 
 Fixed::Fixed(const float value)
@@ -51,7 +51,7 @@ void    Fixed::setRawBits(int const raw)
 
 int Fixed::toInt(void) const
 {
-    return (_value >> _fractionalBits);
+    return (_value / (1 << _fractionalBits));
 }
 
 float Fixed::toFloat(void) const

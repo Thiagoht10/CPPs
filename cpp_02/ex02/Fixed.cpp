@@ -1,4 +1,14 @@
 #include "Fixed.hpp"
+#include <climits>
+
+static int  clampToInt(double value)
+{
+    if (value > INT_MAX)
+        return (INT_MAX);
+    if (value < INT_MIN)
+        return (INT_MIN);
+    return (static_cast<int>(value));
+}
 
 Fixed::Fixed() : _value(0) {};
 
@@ -18,12 +28,12 @@ Fixed& Fixed::operator=(const Fixed& other)
 
 Fixed::Fixed(const int value)
 {
-    _value = value << _fractionalBits;
+    _value = clampToInt(static_cast<double>(value) * (1 << _fractionalBits));
 }
 
 Fixed::Fixed(const float value)
 {
-    _value = roundf(value * (1 << _fractionalBits));
+    _value = clampToInt(roundf(value * (1 << _fractionalBits)));
 }
 
 int Fixed::getRawBits(void) const
@@ -38,7 +48,7 @@ void    Fixed::setRawBits(const int raw)
 
 int Fixed::toInt(void) const
 {
-    return (_value >> _fractionalBits);
+    return (_value / (1 << _fractionalBits));
 }
 
 float   Fixed::toFloat(void) const
@@ -86,7 +96,8 @@ Fixed   Fixed::operator+(const Fixed& other) const
 {
     Fixed   result;
 
-    result.setRawBits(this->_value + other._value);
+    result.setRawBits(clampToInt(static_cast<double>(this->_value)
+            + other._value));
     return (result);
 }
 
@@ -94,31 +105,34 @@ Fixed   Fixed::operator-(const Fixed& other) const
 {
     Fixed   result;
 
-    result.setRawBits(this->_value - other._value);
+    result.setRawBits(clampToInt(static_cast<double>(this->_value)
+            - other._value));
     return (result);
 }
 
 Fixed   Fixed::operator/(const Fixed& other) const
 {
     Fixed   result;
+    double  tmp;
 
-    result.setRawBits((this->_value << _fractionalBits) / other._value);
+    tmp = static_cast<double>(this->_value) * (1 << _fractionalBits);
+    result.setRawBits(clampToInt(tmp / other._value));
     return (result);
 }
 
 Fixed   Fixed::operator*(const Fixed& other) const
 {
     Fixed   result;
-    long    tmp;
+    double  tmp;
 
-    tmp = static_cast<long>(this->_value) * static_cast<long>(other._value);
-    result.setRawBits(tmp >> _fractionalBits);
+    tmp = static_cast<double>(this->_value) * other._value;
+    result.setRawBits(clampToInt(tmp / (1 << _fractionalBits)));
     return (result);
 }
 
 Fixed&  Fixed::operator++(void)
 {
-    this->_value++;
+    this->_value = clampToInt(static_cast<double>(this->_value) + 1);
     return (*this);
 }
 
@@ -126,13 +140,13 @@ Fixed  Fixed::operator++(int)
 {
     Fixed tmp(*this);
 
-    this->_value++;
+    this->_value = clampToInt(static_cast<double>(this->_value) + 1);
     return(tmp);
 }
 
 Fixed&  Fixed::operator--(void)
 {
-    this->_value--;
+    this->_value = clampToInt(static_cast<double>(this->_value) - 1);
     return(*this);
 }
 
@@ -140,7 +154,7 @@ Fixed   Fixed::operator--(int)
 {
     Fixed tmp(*this);
     
-    this->_value--;
+    this->_value = clampToInt(static_cast<double>(this->_value) - 1);
     return(tmp);
 }
 
