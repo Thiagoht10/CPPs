@@ -1,0 +1,28 @@
+CXX = c++
+
+NAME = a.out
+
+FLAGS = -Wall -Werror -Wextra -std=c++98
+
+SRC = AMateria.cpp Character.cpp Ice.cpp Cure.cpp \
+MateriaSource.cpp main.cpp
+
+OBJ = $(SRC:.cpp=.o)
+
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	$(CXX) $(FLAGS) $(OBJ) -o $(NAME)
+
+%.o: %.cpp
+	$(CXX) $(FLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(OBJ)
+
+fclean: clean
+	rm -rf $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
