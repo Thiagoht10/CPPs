@@ -1,25 +1,20 @@
 #include "Bureaucrat.hpp"
+#include "Form.hpp"
 
 int main(void)
 {
-    std::cout << "--correct test--\n" << std::endl;
+    std::cout << "--corret test--\n" << std::endl;
     {
         try
         {
-            Bureaucrat a("Olivia", 10);
-            std::cout << a << "\n";
-
-            a.incrementGrade();
-            std::cout << a << "\n";
-
-            a.decrementGrade();
-            a.decrementGrade();
-            std::cout << a << "\n";
-
-            Bureaucrat b;
-
-            b = a;
-            std::cout << b << "\n";
+            Bureaucrat  bob("Bob", 15);
+            Form        form("Form", 22, 20);
+            
+            std::cout << form << "\n";
+            std::cout << bob << "\n";
+            
+            bob.signForm(form);
+            std::cout << "\n" << form << "\n";
         }
         catch(const std::exception& e)
         {
@@ -27,12 +22,11 @@ int main(void)
         }
     }
 
-    std::cout << "\n--incorret test--\n" << std::endl;
+    std::cout << "\n--wrong test--\n" << std::endl;
     {
         try
         {
-            Bureaucrat b("John", 0);
-            std::cout << b << "\n";
+            Bureaucrat john("John", 160);
         }
         catch(const std::exception& e)
         {
@@ -41,8 +35,7 @@ int main(void)
 
         try
         {
-            Bureaucrat b("John", 190);
-            std::cout << b << "\n";
+            Form    form("Form", 0, 0);
         }
         catch(const std::exception& e)
         {
@@ -51,22 +44,10 @@ int main(void)
 
         try
         {
-            Bureaucrat b("Noah", 1);
-            std::cout << b << "\n";
+            Bureaucrat noah("Noah", 50);
+            Form form("THT", 25, 16);
 
-            b.incrementGrade();
-        }
-        catch(const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-
-        try
-        {
-            Bureaucrat b("Mathew", 150);
-            std::cout << b << "\n";
-
-            b.decrementGrade();
+            noah.signForm(form);
         }
         catch(const std::exception& e)
         {
