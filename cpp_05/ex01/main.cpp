@@ -8,7 +8,7 @@ int main(void)
         try
         {
             Bureaucrat  bob("Bob", 15);
-            Form        form("Form", 22, 20);
+            AForm        form("AForm", 22, 20);
             
             std::cout << form << "\n";
             std::cout << bob << "\n";
@@ -18,7 +18,7 @@ int main(void)
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cout << e.what() << '\n';
         }
     }
 
@@ -30,28 +30,28 @@ int main(void)
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cout << e.what() << '\n';
         }
 
         try
         {
-            Form    form("Form", 0, 0);
+            AForm    form("AForm", 0, 0);
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cout << e.what() << '\n';
         }
 
         try
         {
             Bureaucrat noah("Noah", 50);
-            Form form("THT", 25, 16);
+            AForm form("THT", 25, 16);
 
             noah.signForm(form);
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cout << e.what() << '\n';
         }
     }
 }
