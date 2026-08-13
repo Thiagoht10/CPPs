@@ -90,7 +90,7 @@ void    Bureaucrat::signForm(AForm& form)
     
 }
 
-void    Bureaucrat::executeForm(AForm& form)
+void    Bureaucrat::executeForm(AForm const& form) const
 {
     try
     {
@@ -100,7 +100,7 @@ void    Bureaucrat::executeForm(AForm& form)
     }
     catch(const std::exception& e)
     {
-        std::cout << _name << " couldn't sign "
+        std::cout << _name << " couldn't execute "
         << form.getName() << " because "
         << e.what() << std::endl;
     }

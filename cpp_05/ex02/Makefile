@@ -4,7 +4,8 @@ NAME = a.out
 
 FLAGS = -Wall -Werror -Wextra -std=c++98
 
-SRC = Bureaucrat.cpp AForm.cpp ShrubberyCreationForm.cpp main.cpp
+SRC = Bureaucrat.cpp AForm.cpp ShrubberyCreationForm.cpp RobotomyRequestForm.cpp \
+PresidentialPardonForm.cpp main.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
