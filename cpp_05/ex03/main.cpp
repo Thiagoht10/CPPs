@@ -40,6 +40,7 @@ int main(void)
         john.signForm(*form);
         std::cout << "\n" << *form << "\n";
         john.executeForm(*form);
+        john.executeForm(*form);
         std::cout << "\n" << *form << "\n";
         delete form;
     }
