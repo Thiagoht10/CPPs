@@ -2,14 +2,16 @@
 #define SCALAR_CONVERTER_HPP
 
 #include <string>
+#include <sstream>
 
 class ScalarConverter
 {
 private:
     static bool     ssFailure(std::stringstream& ss);
 
-    static bool     isInt(std::string& str);
+    static bool     pseudoLiteral(std::string& str);
     static bool     isChar(std::string& str);
+    static bool     isInt(std::string& str);
     static bool     isFloat(std::string& str);
     static bool     isDouble(std::string& str);
 
@@ -19,7 +21,10 @@ private:
     static bool     isValidFloat(double value);
     static bool     isValidDouble(double value);
 
+    static void     convertChar(std::string& str);
     static void     convertInt(std::string& str);
+    static void     convertFloat(std::string& str);
+    static void     convertDouble(std::string& str);
 
     ScalarConverter(void);
     ScalarConverter(const ScalarConverter& other);
