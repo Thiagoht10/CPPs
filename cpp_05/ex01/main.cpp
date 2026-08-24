@@ -8,7 +8,7 @@ int main(void)
         try
         {
             Bureaucrat  bob("Bob", 15);
-            AForm        form("AForm", 22, 20);
+            Form        form("AForm", 22, 20);
             
             std::cout << form << "\n";
             std::cout << bob << "\n";
@@ -35,7 +35,7 @@ int main(void)
 
         try
         {
-            AForm    form("AForm", 0, 0);
+            Form    form("AForm", 0, 0);
         }
         catch(const std::exception& e)
         {
@@ -45,7 +45,7 @@ int main(void)
         try
         {
             Bureaucrat noah("Noah", 50);
-            AForm form("THT", 25, 16);
+            Form form("THT", 25, 16);
 
             noah.signForm(form);
         }

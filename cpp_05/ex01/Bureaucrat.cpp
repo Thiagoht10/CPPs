@@ -73,7 +73,7 @@ std::ostream&   operator<<(std::ostream& os, const Bureaucrat& obj)
     return os;
 }
 
-void    Bureaucrat::signForm(AForm& form)
+void    Bureaucrat::signForm(Form& form)
 {
     try
     {
