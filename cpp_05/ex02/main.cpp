@@ -63,4 +63,43 @@ int main(void)
     {
         std::cout << e.what() << '\n';
     }
+
+    std::cout << "\n--wrong test--\n" << std::endl;
+   
+    try
+    {
+        std::cout << "\n--------------------------------\n";
+        Bureaucrat john("John", 8);
+        AForm* form = new PresidentialPardonForm("Gito");
+        std::cout << *form << "\n";
+        std::cout << john << "\n";
+
+        john.executeForm(*form);
+        delete form;
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+    }
+
+    try
+    {
+        std::cout << "\n--------------------------------\n";
+        Bureaucrat john("John", 10);
+        AForm* form = new PresidentialPardonForm("Gito");
+        std::cout << *form << "\n";
+        std::cout << john << "\n";
+
+        john.signForm(*form);
+        std::cout << "\n" << *form << "\n";
+
+        john.executeForm(*form);
+        delete form;
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+    }
+    
+    
 }

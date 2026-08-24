@@ -44,6 +44,16 @@ int main(void)
 
         try
         {
+            Form    form("Aform", 160, 160);
+        }
+        catch(const std::exception& e)
+        {
+            std::cout << e.what() << '\n';
+        }
+        
+
+        try
+        {
             Bureaucrat noah("Noah", 50);
             Form form("THT", 25, 16);
 
