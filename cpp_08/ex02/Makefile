@@ -2,7 +2,7 @@ CXX = c++
 
 NAME = a.out
 
-DEPENDS = easyfind.hpp easyfind.tpp
+DEPENDS = MutantStack.hpp MutantStack.tpp
 
 FLAGS = -Wall -Werror -Wextra -std=c++98
 
