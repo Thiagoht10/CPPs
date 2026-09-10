@@ -1,4 +1,5 @@
 #include "Base.hpp"
+#include <cstdlib>
 #include <ctime>
 
 int main(void)

@@ -4,6 +4,8 @@ NAME = a.out
 
 FLAGS = -Wall -Werror -Wextra -std=c++98
 
+DEPENDS = Base.hpp A.hpp B.hpp C.hpp
+
 SRC = Base.cpp main.cpp
 
 OBJ = $(SRC:.cpp=.o)
@@ -13,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CXX) $(FLAGS) $(OBJ) -o $(NAME)
 
-%.o: %.cpp
+%.o: %.cpp $(DEPENDS)
 	$(CXX) $(FLAGS) -c $< -o $@
 
 clean:

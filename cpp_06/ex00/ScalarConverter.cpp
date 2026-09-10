@@ -4,6 +4,22 @@
 #include <cfloat>
 #include <iostream>
 
+namespace
+{
+    std::string formatNumber(double value)
+    {
+        std::ostringstream ss;
+        ss << value;
+
+        std::string result = ss.str();
+
+        if (result.find_first_of(".eE") == std::string::npos)
+            result += ".0";
+
+        return result;
+    }
+}
+
 ScalarConverter::ScalarConverter(void)
 {}
 
@@ -134,13 +150,13 @@ bool    ScalarConverter::isDouble(std::string& str)
     bool hasDigit = false;
 
 
-    if (str.empty() || !std::isdigit(static_cast<int>(str[str.length() - 1])))
+    if (str.empty())
         return false;
 
     if (str[i] == '+' || str[i] == '-')
         i++;
 
-    while (i < str.length() - 1)
+    while (i < str.length())
     {
         if (std::isdigit(static_cast<unsigned char>(str[i])))
             hasDigit = true;
@@ -198,8 +214,8 @@ void    ScalarConverter::convertChar(std::string& str)
 
    std::cout << "char: \'" << value << "\'" << std::endl;
    std::cout << "int: " << static_cast<int>(value) << std::endl;
-   std::cout << "float: " << static_cast<float>(value) << ".0f" << std::endl;
-   std::cout << "double: " << static_cast<double>(value) << ".0" << std::endl;
+   std::cout << "float: " << formatNumber(static_cast<float>(value)) << "f" << std::endl;
+   std::cout << "double: " << formatNumber(static_cast<double>(value)) << std::endl;
 }
 
 void    ScalarConverter::convertInt(std::string& str)
@@ -230,12 +246,12 @@ void    ScalarConverter::convertInt(std::string& str)
     if (!isValidFloat(value))
         std::cout << "float: impossible" << std::endl;
     else
-        std::cout << "float: " << static_cast<float>(value) << ".0f" << std::endl;
+        std::cout << "float: " << formatNumber(static_cast<float>(value)) << "f" << std::endl;
 
     if (!isValidDouble(value))
         std::cout << "double: impossible" << std::endl;
     else
-        std::cout << "double: " << static_cast<double>(value) << ".0" << std::endl;
+        std::cout << "double: " << formatNumber(static_cast<double>(value)) << std::endl;
     
 }
 
@@ -270,23 +286,12 @@ void    ScalarConverter::convertFloat(std::string& str)
     if (!isValidFloat(value))
         std::cout << "float: impossible" << std::endl;
     else
-    {
-        if (isValidInt(value) && value == static_cast<int>(value))
-            std::cout << "float: " << value << ".0f" << std::endl;
-        else
-            std::cout << "float: " << value << "f" << std::endl;
-    }
+        std::cout << "float: " << formatNumber(value) << "f" << std::endl;
 
     if (!isValidDouble(value))
         std::cout << "double: impossible" << std::endl;
     else
-    {
-        if (isValidInt(value) && value == static_cast<int>(value))
-            std::cout << "double: " << static_cast<double>(value) << ".0" << std::endl;
-        else
-            std::cout << "double: " << static_cast<double>(value) << std::endl;
-
-    }
+        std::cout << "double: " << formatNumber(static_cast<double>(value)) << std::endl;
 }
 
 void    ScalarConverter::convertDouble(std::string& str)
@@ -317,22 +322,12 @@ void    ScalarConverter::convertDouble(std::string& str)
     if (!isValidFloat(value))
         std::cout << "float: impossible" << std::endl;
     else
-    {
-        if (isValidInt(value) && value == static_cast<int>(value))
-            std::cout << "float: " << static_cast<float>(value) << ".0f" << std::endl;
-        else
-            std::cout << "float: " << static_cast<float>(value) << "f" << std::endl;
-    }
+        std::cout << "float: " << formatNumber(static_cast<float>(value)) << "f" << std::endl;
 
     if (!isValidDouble(value))
         std::cout << "double: impossible" << std::endl;
     else
-    {
-        if (isValidInt(value) && value == static_cast<int>(value))
-            std::cout << "double: " << value << ".0" << std::endl;
-        else
-            std::cout << "double: " << value << std::endl;
-    }
+        std::cout << "double: " << formatNumber(value) << std::endl;
 }
 
 void    ScalarConverter::convert(std::string literal)
