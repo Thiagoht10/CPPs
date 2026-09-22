@@ -167,13 +167,13 @@ bool    BitcoinExchange::isValidDate(std::string& line)
     }
     if (sDate.empty())
     {
-        std::cout << "Error: missing date => " << line << std::endl;
+        std::cout << "Error: bad input => " << line << std::endl;
         return false;
     }
 
     if (!isDateFormat(sDate))
     {
-        std::cout << "Error: invalid date format (expected YYYY-MM-DD) => " << line << std::endl;
+        std::cout << "Error: invalid date format (expected YYYY-MM-DD) => " << sDate << std::endl;
         return false;
     }
 
@@ -185,7 +185,7 @@ bool    BitcoinExchange::isValidDate(std::string& line)
 
     if (!isDateRange(date))
     {
-        std::cout << "Error: invalid calendar date => " << line << std::endl;
+        std::cout << "Error: invalid calendar date => " << sDate << std::endl;
         return false;
     }
     
@@ -215,6 +215,61 @@ bool    BitcoinExchange::isValidValue(std::string& line)
     }
 
     return true;
+}
+
+std::map<std::string, double>::iterator BitcoinExchange::findDate(std::string& date)
+{
+    std::map<std::string, double>::iterator it;
+
+    it = _dataBase.lower_bound(date);
+
+    if (it == _dataBase.end())
+    {
+        if (!_dataBase.empty())
+            --it;
+        return it;
+    }
+
+    if (it->first != date && it != _dataBase.begin())
+        --it;
+
+    return it;
+}
+
+bool    BitcoinExchange::calculateFinalPrice(std::string& line)
+{
+    std::map<std::string, double>::iterator it;
+    std::string date;
+    double  amount;
+    double  finalPrice;
+
+    if (!readDate(line, '|', date))
+        return false;
+
+    if (!readValue(line, '|', amount))
+        return false;
+
+    it = findDate(date);
+
+    if (it->first > date)
+    {
+        std::cout << "Error: date not found." << std::endl;
+        return true;
+    }
+    
+    finalPrice = it->second * amount;
+    
+    std::cout << date << " => " << amount << " = " << finalPrice << std::endl;
+
+    return true;
+}
+
+bool    BitcoinExchange::isEmpty() const
+{
+    if (_dataBase.empty())
+        return true;
+
+    return false;
 }
 
 void    BitcoinExchange::loadDatabase(std::string path)
@@ -274,10 +329,13 @@ bool    BitcoinExchange::readInput(std::string path)
     while(std::getline(file, line))
     {
         if (isValidDate(line) && isValidValue(line))
-            std::cout << "OK" << std::endl;
+        {
+            if (!calculateFinalPrice(line))
+                throw std::runtime_error("failure to calculate final price");
+        }
     }
 
-    return true;    
+    return true;
 }
 
 void    BitcoinExchange::printAll()

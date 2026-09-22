@@ -31,6 +31,8 @@ private:
 
     bool    isValidDate(std::string& line);
     bool    isValidValue(std::string& line);
+    std::map<std::string, double>::iterator findDate(std::string& date);
+    bool    calculateFinalPrice(std::string& line);
 
 public:
     BitcoinExchange();
@@ -40,6 +42,7 @@ public:
 
     void    loadDatabase(std::string path);
     bool    readInput(std::string path);
+    bool    isEmpty() const;
     void    printAll();
 };
 
