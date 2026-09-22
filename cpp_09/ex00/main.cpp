@@ -1,15 +1,22 @@
 #include "BitcoinExchange.hpp"
+#include <iostream>
 
 int main(void)
 {
     BitcoinExchange dataBase;
 
-    if (!dataBase.loadDatabase("data.csv"))
+    try
+    {
+        dataBase.loadDatabase("data.csv");
+        dataBase.readInput("input.txt");
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << e.what() << '\n';
         return 1;
-    if (dataBase.readInput("input.txt"))
-        return 1;
+    }
 
-    dataBase.printAll();
+    //dataBase.printAll();
 
     return 0;
 }

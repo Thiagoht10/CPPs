@@ -1,6 +1,7 @@
 #include "BitcoinExchange.hpp"
 #include <iostream>
 #include <sstream>
+#include <limits.h>
 
 BitcoinExchange::BitcoinExchange()
 {}
@@ -24,40 +25,34 @@ void  BitcoinExchange::openFile(std::ifstream& file, std::string path)
 {
     file.open(path.c_str());
     if (file.fail())
-    {
-        if (path.find(".csv") != std::string::npos)
-            throw std::runtime_error("failure to load database");
-        else
-            throw std::runtime_error("failure to load file");
-    }
+        throw std::runtime_error("failure to load file");
 
 }
 
-std::string BitcoinExchange::readDate(std::string& line, const char delimiter)
+bool BitcoinExchange::readDate(std::string& line, const char delimiter, std::string& date)
 {
-    std::string date;
     size_t  pos;
 
     pos = line.find(delimiter);
     if (pos == std::string::npos)
-        return std::string();
+        return false;
 
-    while (line[pos - 1] == 32)
+    while (pos > 0 && line[pos - 1] == 32)
         pos--;
+    
     date = line.substr(0, pos);
 
-    return date;
+    return true;
 }
 
-double  BitcoinExchange::readValue(std::string& line, const char delimiter)
+bool  BitcoinExchange::readValue(std::string& line, const char delimiter, double& value)
 {
     std::string tmp;
     size_t  pos;
-    double  value;
 
     pos = line.find(delimiter);
     if (pos == std::string::npos)
-        return 0;
+        return false;
 
     while (line[pos + 1] == 32)
         pos++;
@@ -67,7 +62,15 @@ double  BitcoinExchange::readValue(std::string& line, const char delimiter)
     std::stringstream ss(tmp);
     ss >> value;
 
-    return value;
+    if (ss.fail())
+        return false;
+
+    ss >> std::ws;
+
+    if (!ss.eof())
+        return false;
+
+    return true;
 }
 
 int     BitcoinExchange::convertInt(std::string& str)
@@ -114,9 +117,8 @@ bool    BitcoinExchange::loadDate(std::string& sDate, Date& date)
         date.month = convertInt(month);
         date.day = convertInt(day);
     }
-    catch(const std::exception& e)
+    catch(const std::exception&)
     {
-        std::cout << e.what() << '\n';
         return false;
     }
 
@@ -158,34 +160,69 @@ bool    BitcoinExchange::isValidDate(std::string& line)
     std::string sDate;
     Date    date;
 
-    sDate = readDate(line, '|');
-    if (sDate.empty())
+    if (!readDate(line, '|', sDate))
+    {
+        std::cout << "Error: bad input => " << line << std::endl;
         return false;
+    }
+    if (sDate.empty())
+    {
+        std::cout << "Error: missing date => " << line << std::endl;
+        return false;
+    }
 
     if (!isDateFormat(sDate))
+    {
+        std::cout << "Error: invalid date format (expected YYYY-MM-DD) => " << line << std::endl;
         return false;
+    }
 
     if (!loadDate(sDate, date))
+    {
+        std::cout << "Error: date conversion failed => " << line << std::endl;
         return false;
+    }
 
     if (!isDateRange(date))
+    {
+        std::cout << "Error: invalid calendar date => " << line << std::endl;
         return false;
+    }
     
     return true;
 }
 
-/* bool    BitcoinExchange::isValidValue(std::string& line)
+bool    BitcoinExchange::isValidValue(std::string& line)
 {
-    double value;
+    double    value;
 
-    value = readValue(line, '|');
+    if (!readValue(line, '|', value))
+    {
+        std::cout << "Error: bad input => " << line << std::endl;
+        return false;
+    }
 
-} */
+    if (value < 0)
+    {
+        std::cout << "Error: not a positive number." << std::endl;
+        return false;
+    }
 
-bool    BitcoinExchange::loadDatabase(std::string path)
+    if (value > 1000)
+    {
+        std::cout << "Error: too large a number." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void    BitcoinExchange::loadDatabase(std::string path)
 {
     std::ifstream file;
     std::string line;
+    std::string key;
+    double  value;
 
     try
     {
@@ -193,18 +230,24 @@ bool    BitcoinExchange::loadDatabase(std::string path)
     }
     catch(const std::exception& e)
     {
-        std::cout << e.what() << '\n';
-        return false;
+        throw std::runtime_error(e.what());
     }
+
+    if (!std::getline(file, line))
+        throw std::runtime_error("empty database");
+
+    if (line != "date,exchange_rate")
+        throw std::runtime_error("invalid database header");
 
     while (std::getline(file, line))
     {
-        _dataBase[readDate(line, ',')] = readValue(line, ',');
+        key.erase();
+        if (!readDate(line, ',', key))
+            throw std::runtime_error("failure to load database");
+        if (!readValue(line, ',', value))
+            throw std::runtime_error("failure to load database");
+        _dataBase[key] = value;
     }
-    return true;
-
-    //consertar o retorno das funções
-    //
 }
 
 bool    BitcoinExchange::readInput(std::string path)
@@ -222,12 +265,16 @@ bool    BitcoinExchange::readInput(std::string path)
         return false;
     }
 
+    if (!std::getline(file, line))
+        throw std::runtime_error("empty input");
+
+    if (line != "date | value")
+        throw std::runtime_error("invalid input header");
+
     while(std::getline(file, line))
     {
-        if (isValidDate(line))
+        if (isValidDate(line) && isValidValue(line))
             std::cout << "OK" << std::endl;
-        else
-            std::cout << "NOK" << std::endl;
     }
 
     return true;    

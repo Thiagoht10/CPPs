@@ -20,8 +20,8 @@ private:
     std::map<std::string, double> _dataBase;
 
     void    openFile(std::ifstream& file, std::string path);
-    std::string     readDate(std::string& line, const char delimiter);
-    double  readValue(std::string& line, const char delimiter);
+    bool    readDate(std::string& line, const char delimiter, std::string& date);
+    bool    readValue(std::string& line, const char delimiter, double& value);
     int     fitsInInt(std::string& str);
     int     convertInt(std::string& str);
     int     getDaysInMonth(int month, int year);
@@ -38,7 +38,7 @@ public:
     BitcoinExchange&    operator=(const BitcoinExchange& other);
     ~BitcoinExchange();
 
-    bool    loadDatabase(std::string path);
+    void    loadDatabase(std::string path);
     bool    readInput(std::string path);
     void    printAll();
 };
