@@ -19,20 +19,21 @@ class BitcoinExchange
 private:
     std::map<std::string, double> _dataBase;
 
-    void    openFile(std::ifstream& file, std::string path);
-    bool    readDate(std::string& line, const char delimiter, std::string& date);
-    bool    readValue(std::string& line, const char delimiter, double& value);
-    int     fitsInInt(std::string& str);
-    int     convertInt(std::string& str);
-    int     getDaysInMonth(int month, int year);
-    bool    loadDate(std::string& sDate, Date& date);
-    bool    isDateFormat(std::string& sDate);
-    bool    isDateRange(Date& date);
+    bool    openFile(std::ifstream& file, const std::string& path) const;
+    bool    readDate(const std::string& line, const char delimiter, std::string& date) const;
+    bool    readValue(const std::string& line, const char delimiter, double& value) const;
+    int     convertInt(const std::string& str) const;
+    int     getDaysInMonth(int month, int year) const;
+    bool    loadDate(const std::string& sDate, Date& date) const;
+    bool    isDateFormat(const std::string& sDate) const;
+    bool    isDateRange(const Date& date) const;
 
-    bool    isValidDate(std::string& line);
-    bool    isValidValue(std::string& line);
-    std::map<std::string, double>::iterator findDate(std::string& date);
-    bool    calculateFinalPrice(std::string& line);
+    bool    isValidDate(const std::string& line) const;
+    bool    isValidValue(const std::string& line) const;
+    bool    isValidDatabaseDate(const std::string& line) const;
+    bool    isValidDatabaseValue(const std::string& line) const;
+    std::map<std::string, double>::const_iterator findDate(const std::string& date) const;
+    bool    calculateFinalPrice(const std::string& line) const;
 
 public:
     BitcoinExchange();
@@ -40,10 +41,10 @@ public:
     BitcoinExchange&    operator=(const BitcoinExchange& other);
     ~BitcoinExchange();
 
-    void    loadDatabase(std::string path);
-    bool    readInput(std::string path);
+    void    loadDatabase(const std::string& path);
+    void    readInput(const std::string& path) const;
     bool    isEmpty() const;
-    void    printAll();
+    //void    printAll();
 };
 
 
