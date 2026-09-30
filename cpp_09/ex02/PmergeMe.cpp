@@ -8,7 +8,7 @@ PmergeMe::PmergeMe()
 {}
 
 PmergeMe::PmergeMe(const PmergeMe& other)
-    : _beforeSort(other._beforeSort), _vector(other._vector),
+    : _beforeSort(other._beforeSort), _pairs(other._pairs), _vector(other._vector),
     _mainChain(other._mainChain), _pending(other._pending),
     _deque(other._deque)
 {}
@@ -22,6 +22,7 @@ PmergeMe&   PmergeMe::operator=(const PmergeMe& other)
         _beforeSort = other._beforeSort;
         _mainChain = other._mainChain;
         _pending = other._pending;
+        _pairs = other._pairs;
     }
 
     return *this;
@@ -112,30 +113,152 @@ void    PmergeMe::sortVectorPairs()
     }
 }
 
-//mudar esta função
-void    PmergeMe::sortVectorPairsByMax()
+void    PmergeMe::buildVectorPairs()
 {
-    bool sorted = false;
+    _pairs.clear();
 
-    while (!sorted)
+    for (size_t i = 1; i < _vector.size(); i += 2)
     {
-        bool wasChanged = false;
+        Pairs pair;
 
-        for (size_t i = 1; i + 2 < _vector.size(); i += 2)
-        {
-            if (_vector[i] > _vector[i + 2])
-            {
-                std::swap(_vector[i - 1], _vector[i + 1]);
-                std::swap(_vector[i], _vector[i + 2]);
+        pair.small = _vector[i - 1];
+        pair.large = _vector[i];
 
-                wasChanged = true;
-            }
-        }
-        if (!wasChanged)
-            sorted = true;
-    }      
+        pair.id = _pairs.size();
+        _pairs.push_back(pair);
+    }
 }
 
+void    PmergeMe::buildWinners(std::vector<Pairs>& pairs, std::vector<Pairs>& winners,
+        std::vector<Losers>& losers)
+{
+    winners.clear();
+
+    Losers loser;
+
+    for (size_t i = 0; i + 1 < pairs.size(); i += 2)
+    {
+        if (pairs[i].large > pairs[i + 1].large)
+        {
+            winners.push_back(pairs[i]);
+            loser.pair = pairs[i + 1];
+            loser.winnerId = pairs[i].id;
+        }
+        else
+        {
+            winners.push_back(pairs[i + 1]);
+            loser.pair = pairs[i];
+            loser.winnerId = pairs[i + 1].id;
+        }
+
+        losers.push_back(loser);
+    }
+}
+
+//mudar esta função
+void    PmergeMe::sortVectorPairsByMax(std::vector<Pairs>& pairs)
+{
+    if (pairs.size() <= 1)
+        return;
+    
+    bool hasLeftover = (pairs.size() % 2 != 0);
+    Pairs leftover;
+
+    if (hasLeftover)
+        leftover = pairs.back();
+        
+    std::vector<Pairs> winners;
+    std::vector<Losers> losers;
+
+    buildWinners(pairs, winners, losers);
+
+    sortVectorPairsByMax(winners);
+
+    std::vector<Pairs> pending;
+
+    for (size_t i = 0; i < winners.size(); i++)
+    {
+        for (size_t j = 0; j < losers.size(); j++)
+        {
+            if (losers[j].winnerId == winners[i].id)
+            {
+                pending.push_back(losers[j].pair);
+                break;
+            }
+        }
+    }
+
+    if (hasLeftover)
+        pending.push_back(leftover);
+
+    pairs = buildSequence(winners, pending);
+}
+
+std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
+        std::vector<Pairs>& pending)
+{
+     std::vector<Pairs> sequence(winners);
+    sequence.insert(sequence.begin(), pending[0]);
+
+    // Inserir os demais pendentes em blocos de Jacobsthal.
+    size_t processed = 1;
+    size_t previousJacob = 1;
+    size_t jacob = 3;
+
+    while (processed < pending.size())
+    {
+        size_t end = jacob;
+
+        if (end > pending.size())
+            end = pending.size();
+
+        for (size_t position = end; position > processed; position--)
+        {
+            size_t index = position - 1;
+            size_t limit = sequence.size();
+
+            // A sobra não tem vencedor: usa a cadeia inteira.
+            if (index < winners.size())
+            {
+                // Encontrar a posição atual do vencedor associado.
+                for (size_t j = 0; j < sequence.size(); j++)
+                {
+                    if (sequence[j].id == winners[index].id)
+                    {
+                        limit = j;
+                        break;
+                    }
+                }
+            }
+
+            // Buscar a posição de inserção antes do vencedor.
+            size_t left = 0;
+            size_t right = limit;
+
+            while (left < right)
+            {
+                size_t middle = left + (right - left) / 2;
+
+                if (sequence[middle].large < pending[index].large)
+                    left = middle + 1;
+                else
+                    right = middle;
+            }
+
+            sequence.insert(sequence.begin() + left, pending[index]);
+        }
+
+        processed = end;
+
+        size_t nextJacob = jacob + 2 * previousJacob;
+        previousJacob = jacob;
+        jacob = nextJacob;
+    }
+
+    return sequence;
+}
+
+//mudar esta função. Recebe dois parâmetros: mainchain e pending
 void    PmergeMe::buildMainAndPending()
 {
     size_t size = _vector.size();
@@ -162,7 +285,9 @@ void    PmergeMe::execute(char* argv[])
 
     saveOriginalValues();
     sortVectorPairs();
-    sortVectorPairsByMax();
+    buildVectorPairs();
+    sortVectorPairsByMax(_pairs);
+    //criar a função sortVector que aplicará o jacobsthal e chamará a função abaixo
     buildMainAndPending();
 }
 
