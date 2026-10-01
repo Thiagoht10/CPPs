@@ -9,7 +9,6 @@ PmergeMe::PmergeMe()
 
 PmergeMe::PmergeMe(const PmergeMe& other)
     : _beforeSort(other._beforeSort), _pairs(other._pairs), _vector(other._vector),
-    _mainChain(other._mainChain), _pending(other._pending),
     _deque(other._deque)
 {}
 
@@ -20,8 +19,6 @@ PmergeMe&   PmergeMe::operator=(const PmergeMe& other)
         _vector = other._vector;
         _deque = other._deque;
         _beforeSort = other._beforeSort;
-        _mainChain = other._mainChain;
-        _pending = other._pending;
         _pairs = other._pairs;
     }
 
@@ -197,7 +194,7 @@ void    PmergeMe::sortVectorPairsByMax(std::vector<Pairs>& pairs)
 std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
         std::vector<Pairs>& pending)
 {
-     std::vector<Pairs> sequence(winners);
+    std::vector<Pairs> sequence(winners);
     sequence.insert(sequence.begin(), pending[0]);
 
     // Inserir os demais pendentes em blocos de Jacobsthal.
@@ -258,21 +255,110 @@ std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
     return sequence;
 }
 
-//mudar esta função. Recebe dois parâmetros: mainchain e pending
-void    PmergeMe::buildMainAndPending()
+void    PmergeMe::sortVector()
 {
-    size_t size = _vector.size();
+    if (_vector.size() <= 1)
+        return;
+    
+    std::vector<ChainElement> mainChain;
+    std::vector<int> pending;
+    std::vector<int> result;
 
-    _mainChain.push_back(_vector[0]);
+    buildMainAndPending(mainChain, pending);
+    insertPending(mainChain, pending);
 
-    for (size_t i = 1; i < size; i += 2)
-        _mainChain.push_back(_vector[i]);
+    for (size_t i = 0; i < mainChain.size(); i++)
+        result.push_back(mainChain[i].value);
 
-    for (size_t i = 2; i + 1 < size; i += 2)
-        _pending.push_back(_vector[i]);
+    _vector = result;
+}
 
-    if (size > 1 && size % 2 != 0)
-        _pending.push_back(_vector[size - 1]);
+//mudar esta função. Recebe dois parâmetros: mainchain e pending
+void    PmergeMe::buildMainAndPending(std::vector<ChainElement>& mainChain,
+        std::vector<int>& pending)
+{
+
+    for (size_t i = 0; i < _pairs.size(); i++)
+    {
+        ChainElement element;
+
+        element.value = _pairs[i].large;
+        element.pairId = _pairs[i].id;
+
+        mainChain.push_back(element);
+    }
+
+    for (size_t i = 0; i < _pairs.size(); i++)
+        pending.push_back(_pairs[i].small);
+
+    if (_vector.size() % 2 != 0)
+        pending.push_back(_vector.back());    
+}
+
+void    PmergeMe::insertPending(std::vector<ChainElement>& mainChain,
+        std::vector<int>& pending)
+{
+    size_t processed = 1;
+    size_t previousJacob = 1;
+    size_t jacob = 3;
+
+    ChainElement firstElement;
+
+    firstElement.value = _pairs[0].small;
+    firstElement.pairId = _pairs[0].id;
+
+    mainChain.insert(mainChain.begin(), firstElement);
+
+    while (processed < pending.size())
+    {
+        size_t end = jacob;
+
+        if (end > pending.size())
+            end = pending.size();
+
+        for (size_t position = end; position > processed; position--)
+        {
+            size_t index = position - 1;
+            size_t limit = mainChain.size();
+
+            if (index < _pairs.size())
+            {
+                for (size_t i = 0; i < pending.size(); i++)
+                {
+                    if (mainChain[i].pairId == _pairs[index].id)
+                    {
+                        limit = i;
+                        break;
+                    }
+                }
+            }
+
+            size_t left = 0;
+            size_t right = limit;
+
+            while (left < right)
+            {
+                size_t middle = left + (right - left) / 2;
+
+                if (mainChain[middle].value < pending[index])
+                    left = middle + 1;
+                else
+                    right = middle;
+            }
+            ChainElement element;
+            element.value = pending[index];
+            element.pairId = index < _pairs.size()
+                ? _pairs[index].id : _pairs.size();
+            
+            mainChain.insert(mainChain.begin() + left, element);
+        }
+
+        processed = end;
+
+        size_t nextJacob = jacob + 2 * previousJacob;
+        previousJacob = jacob;
+        jacob = nextJacob;
+    }    
 }
 
 void    PmergeMe::execute(char* argv[])
@@ -287,8 +373,7 @@ void    PmergeMe::execute(char* argv[])
     sortVectorPairs();
     buildVectorPairs();
     sortVectorPairsByMax(_pairs);
-    //criar a função sortVector que aplicará o jacobsthal e chamará a função abaixo
-    buildMainAndPending();
+    sortVector();
 }
 
 void    PmergeMe::printAll()
@@ -300,18 +385,6 @@ void    PmergeMe::printAll()
     std::cout << "vector: ";
     for (size_t i = 0; i < size; i++)
         std::cout << _vector[i] << " ";
-
-    std::cout << std::endl;
-
-    std::cout << "mainChain: ";
-    for (size_t i = 0; i < _mainChain.size(); i++)
-        std::cout << _mainChain[i] << " ";
-
-    std::cout << std::endl;
-
-    std::cout << "pending: ";
-    for (size_t i = 0; i < _pending.size(); i++)
-        std::cout << _pending[i] << " ";
 
     std::cout << std::endl;
 

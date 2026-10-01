@@ -5,6 +5,12 @@
 #include <deque>
 #include <string>
 
+struct ChainElement
+{
+    int value;
+    size_t pairId;
+};
+
 struct Pairs
 {
     int small;
@@ -24,10 +30,7 @@ class PmergeMe
 private:
     std::string _beforeSort;
     std::vector<Pairs>  _pairs;
-
     std::vector<int> _vector;
-    //std::vector<int> _mainChain;
-    //std::vector<int> _pending;
 
     std::deque<int> _deque;
 
@@ -39,14 +42,14 @@ private:
     void    buildVectorPairs();
     void    buildWinners(std::vector<Pairs>& pairs, std::vector<Pairs>& winners,
                 std::vector<Losers>& losers);
-
     void    sortVectorPairsByMax(std::vector<Pairs>& pairs);
-
     std::vector<Pairs> buildSequence(std::vector<Pairs>& winners,
                 std::vector<Pairs>& pending);
-
-    void    buildMainAndPending();
-
+    void    sortVector();
+    void    buildMainAndPending(std::vector<ChainElement>& mainChain,
+                std::vector<int>& pending);
+    void    insertPending(std::vector<ChainElement>& mainChain,
+                std::vector<int>& pending);
 
 public:
     PmergeMe();
