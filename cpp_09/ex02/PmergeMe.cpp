@@ -3,12 +3,13 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <ctime>
 
 PmergeMe::PmergeMe()
 {}
 
 PmergeMe::PmergeMe(const PmergeMe& other)
-    : _beforeSort(other._beforeSort), _pairs(other._pairs), _vector(other._vector),
+    : _beforeSort(other._beforeSort), _pairsVector(other._pairsVector), _vector(other._vector),
     _deque(other._deque)
 {}
 
@@ -19,7 +20,7 @@ PmergeMe&   PmergeMe::operator=(const PmergeMe& other)
         _vector = other._vector;
         _deque = other._deque;
         _beforeSort = other._beforeSort;
-        _pairs = other._pairs;
+        _pairsVector = other._pairsVector;
     }
 
     return *this;
@@ -112,7 +113,7 @@ void    PmergeMe::sortVectorPairs()
 
 void    PmergeMe::buildVectorPairs()
 {
-    _pairs.clear();
+    _pairsVector.clear();
 
     for (size_t i = 1; i < _vector.size(); i += 2)
     {
@@ -121,8 +122,8 @@ void    PmergeMe::buildVectorPairs()
         pair.small = _vector[i - 1];
         pair.large = _vector[i];
 
-        pair.id = _pairs.size();
-        _pairs.push_back(pair);
+        pair.id = _pairsVector.size();
+        _pairsVector.push_back(pair);
     }
 }
 
@@ -278,18 +279,17 @@ void    PmergeMe::buildMainAndPending(std::vector<ChainElement>& mainChain,
         std::vector<int>& pending)
 {
 
-    for (size_t i = 0; i < _pairs.size(); i++)
+    for (size_t i = 0; i < _pairsVector.size(); i++)
     {
         ChainElement element;
 
-        element.value = _pairs[i].large;
-        element.pairId = _pairs[i].id;
+        element.value = _pairsVector[i].large;
+        element.pairId = _pairsVector[i].id;
 
         mainChain.push_back(element);
-    }
 
-    for (size_t i = 0; i < _pairs.size(); i++)
-        pending.push_back(_pairs[i].small);
+        pending.push_back(_pairsVector[i].small);
+    }
 
     if (_vector.size() % 2 != 0)
         pending.push_back(_vector.back());    
@@ -304,8 +304,8 @@ void    PmergeMe::insertPending(std::vector<ChainElement>& mainChain,
 
     ChainElement firstElement;
 
-    firstElement.value = _pairs[0].small;
-    firstElement.pairId = _pairs[0].id;
+    firstElement.value = _pairsVector[0].small;
+    firstElement.pairId = _pairsVector[0].id;
 
     mainChain.insert(mainChain.begin(), firstElement);
 
@@ -321,11 +321,11 @@ void    PmergeMe::insertPending(std::vector<ChainElement>& mainChain,
             size_t index = position - 1;
             size_t limit = mainChain.size();
 
-            if (index < _pairs.size())
+            if (index < _pairsVector.size())
             {
-                for (size_t i = 0; i < pending.size(); i++)
+                for (size_t i = 0; i < mainChain.size(); i++)
                 {
-                    if (mainChain[i].pairId == _pairs[index].id)
+                    if (mainChain[i].pairId == _pairsVector[index].id)
                     {
                         limit = i;
                         break;
@@ -347,8 +347,8 @@ void    PmergeMe::insertPending(std::vector<ChainElement>& mainChain,
             }
             ChainElement element;
             element.value = pending[index];
-            element.pairId = index < _pairs.size()
-                ? _pairs[index].id : _pairs.size();
+            element.pairId = index < _pairsVector.size()
+                ? _pairsVector[index].id : _pairsVector.size();
             
             mainChain.insert(mainChain.begin() + left, element);
         }
@@ -361,8 +361,281 @@ void    PmergeMe::insertPending(std::vector<ChainElement>& mainChain,
     }    
 }
 
+void    PmergeMe::executeVector()
+{
+    sortVectorPairs();
+    buildVectorPairs();
+    sortVectorPairsByMax(_pairsVector);
+    sortVector();
+}
+
+void    PmergeMe::sortDequePairs()
+{
+    for (size_t i = 0; i + 1 < _deque.size(); i += 2)
+    {
+        if (_deque[i] > _deque[i + 1])
+            std::swap(_deque[i], _deque[i + 1]);
+    }
+}
+
+void    PmergeMe::buildDequePairs()
+{
+    _pairsDeque.clear();
+
+    for (size_t i = 1; i < _deque.size(); i += 2)
+    {
+        Pairs pairs;
+
+        pairs.large = _deque[i];
+        pairs.small = _deque[i - 1];
+        pairs.id = _pairsDeque.size();
+
+        _pairsDeque.push_back(pairs);
+    }
+}
+
+void    PmergeMe::buildWinners(std::deque<Pairs>& pairs, std::deque<Pairs>& winners,
+        std::deque<Losers>& losers)
+{
+    winners.clear();
+
+    for (size_t i = 1; i < pairs.size(); i += 2)
+    {
+        Losers loser;
+
+        if (pairs[i].large > pairs[i - 1].large)
+        {
+            winners.push_back(pairs[i]);
+            loser.pair = pairs[i - 1];
+            loser.winnerId = pairs[i].id;
+        }
+        else
+        {
+            winners.push_back(pairs[i - 1]);
+            loser.pair = pairs[i];
+            loser.winnerId = pairs[i - 1].id;
+        }
+
+        losers.push_back(loser);
+    }
+}
+
+void    PmergeMe::sortDequePairsByMax(std::deque<Pairs>& pairs)
+{
+    if (pairs.size() <= 1)
+        return;
+
+    bool hasLeftover = (pairs.size() % 2 != 0);
+    Pairs leftover;
+
+    if (hasLeftover)
+        leftover = pairs.back();
+
+    std::deque<Pairs> winners;
+    std::deque<Losers> losers;
+
+    buildWinners(pairs, winners, losers);
+
+    sortDequePairsByMax(winners);
+
+    std::deque<Pairs> pending;
+
+    for (size_t i = 0; i < winners.size(); i++)
+    {
+        for (size_t j = 0; j < losers.size(); j++)
+        {
+            if (losers[j].winnerId == winners[i].id)
+            {
+                pending.push_back(losers[j].pair);
+                break;
+            }
+        }
+    }
+
+    if (hasLeftover)
+        pending.push_back(leftover);
+
+    pairs = buildSequence(winners, pending);
+}
+
+std::deque<Pairs> PmergeMe::buildSequence(std::deque<Pairs>& winners,
+        std::deque<Pairs>& pending)
+{
+    std::deque<Pairs> sequence(winners);
+    sequence.insert(sequence.begin(), pending[0]);
+
+    size_t processed = 1;
+    size_t previusJacob = 1;
+    size_t jacob = 3;
+
+    while (processed < pending.size())
+    {
+        size_t end = jacob;
+
+        if (end > pending.size())
+            end = pending.size();
+
+        for (size_t position = end; position > processed; position--)
+        {
+            size_t index = position - 1;
+            size_t limit = sequence.size();
+
+            if (index < winners.size())
+            {
+                for (size_t j = 0; j < sequence.size(); j++)
+                {
+                    if (sequence[j].id == winners[index].id)
+                    {
+                        limit = j;
+                        break;
+                    }
+                }
+            }
+
+            size_t right = limit;
+            size_t left = 0;
+
+            while (left < right)
+            {
+                size_t middle = left + (right - left) / 2;
+
+                if (sequence[middle].large < pending[index].large)
+                    left = middle + 1;
+                else
+                    right = middle;
+            }
+
+            sequence.insert(sequence.begin() + left, pending[index]);
+        }
+
+        processed = end;
+
+        size_t nextJacob = jacob + 2 * previusJacob;
+        previusJacob = jacob;
+        jacob = nextJacob;
+    }
+
+    return sequence;
+}
+
+void    PmergeMe::sortDeque()
+{
+    if (_deque.size() <= 1)
+        return;
+
+    std::deque<ChainElement> mainChain;
+    std::deque<int> pending;
+    std::deque<int> result;
+
+    buildMainAndPending(mainChain, pending);
+    insertPending(mainChain, pending);
+
+    for (size_t i = 0; i < mainChain.size(); i++)
+    {
+        result.push_back(mainChain[i].value);
+    }
+    _deque = result;    
+}
+
+void    PmergeMe::buildMainAndPending(std::deque<ChainElement>& mainChain,
+            std::deque<int>& pending)
+{
+    for (size_t i = 0; i < _pairsDeque.size(); i++)
+    {
+        ChainElement element;
+
+        element.value = _pairsDeque[i].large;
+        element.pairId = _pairsDeque[i].id;
+
+        mainChain.push_back(element);
+
+        pending.push_back(_pairsDeque[i].small);
+    }
+
+    if (_deque.size() % 2 != 0)
+        pending.push_back(_deque.back());
+}
+
+void    PmergeMe::insertPending(std::deque<ChainElement>& mainChain,
+            std::deque<int>& pending)
+{
+    size_t processed = 1;
+    size_t jacob = 3;
+    size_t previusJacob = 1;
+
+    ChainElement firstElement;
+
+    firstElement.value = _pairsDeque[0].small;
+    firstElement.pairId = _pairsDeque[0].id;
+
+    mainChain.insert(mainChain.begin(), firstElement);
+
+    while (processed < pending.size())
+    {
+        size_t end = jacob;
+
+        if (end > pending.size())
+            end = pending.size();
+
+        for (size_t position = end; position > processed; position--)
+        {
+            size_t index = position - 1;
+            size_t limit = mainChain.size();
+
+            if (index < _pairsDeque.size())
+            {
+                for (size_t i = 0; i < mainChain.size(); i++)
+                {
+                    if (mainChain[i].pairId == _pairsDeque[index].id)
+                    {
+                        limit = i;
+                        break;
+                    }
+                }
+            }
+
+            size_t right = limit;
+            size_t left = 0;
+
+            while (left < right)
+            {
+                size_t middle = left + (right - left) / 2;
+
+                if (mainChain[middle].value < pending[index])  
+                    left = middle + 1;
+                else
+                    right = middle;              
+            }
+            ChainElement element;
+
+            element.value = pending[index];
+            element.pairId = index < _pairsDeque.size()
+            ? _pairsDeque[index].id : _pairsDeque.size();
+
+            mainChain.insert(mainChain.begin() + left, element);           
+        }
+
+        processed = end;
+
+        size_t nextJacob = jacob + 2 * previusJacob;
+        previusJacob = jacob;
+        jacob = nextJacob;
+    }
+    
+}
+
+void    PmergeMe::executeDeque()
+{
+    sortDequePairs();
+    buildDequePairs();
+    sortDequePairsByMax(_pairsDeque);
+    sortDeque();
+}
+
 void    PmergeMe::execute(char* argv[])
 {
+    std::clock_t start;
+
     if (!parsing(argv))
         throw std::runtime_error("invalid input");
 
@@ -370,10 +643,16 @@ void    PmergeMe::execute(char* argv[])
         throw std::runtime_error("failure to add numbers");
 
     saveOriginalValues();
-    sortVectorPairs();
-    buildVectorPairs();
-    sortVectorPairsByMax(_pairs);
-    sortVector();
+
+    start = std::clock();
+    executeVector();
+    _vectorTime = static_cast<double>(std::clock() - start) 
+        / CLOCKS_PER_SEC * 1000000.0;
+
+    start = std::clock();
+    executeDeque();
+    _dequeTime = static_cast<double>(std::clock() - start) 
+        / CLOCKS_PER_SEC * 1000000.0;
 }
 
 void    PmergeMe::printAll()
@@ -382,15 +661,23 @@ void    PmergeMe::printAll()
     
     std::cout << "before: " << _beforeSort << std::endl;
 
-    std::cout << "vector: ";
+    std::cout << "after: ";
     for (size_t i = 0; i < size; i++)
         std::cout << _vector[i] << " ";
 
     std::cout << std::endl;
 
-    std::cout << "deque: ";
+    /* std::cout << "deque: ";
     for (size_t i = 0; i < size; i++)
         std::cout << _deque[i] << " ";
-    
-    std::cout << std::endl;
+
+    std::cout << std::endl; */
+
+    std::cout << "Time to process a range of " << _vector.size()
+          << " elements with std::vector : "
+          << _vectorTime << " us" << std::endl;
+
+    std::cout << "Time to process a range of " << _deque.size()
+          << " elements with std::deque : "
+          << _dequeTime << " us" << std::endl;
 }

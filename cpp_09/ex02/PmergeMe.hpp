@@ -28,10 +28,14 @@ struct Losers
 class PmergeMe
 {
 private:
+    double  _vectorTime;
+    double  _dequeTime;
     std::string _beforeSort;
-    std::vector<Pairs>  _pairs;
+
+    std::vector<Pairs>  _pairsVector;
     std::vector<int> _vector;
 
+    std::deque<Pairs>   _pairsDeque;
     std::deque<int> _deque;
 
     bool    parsing(char* argv[]) const;
@@ -50,7 +54,21 @@ private:
                 std::vector<int>& pending);
     void    insertPending(std::vector<ChainElement>& mainChain,
                 std::vector<int>& pending);
+    void    executeVector();
 
+    void    sortDequePairs();
+    void    buildDequePairs();
+    void    buildWinners(std::deque<Pairs>& pairs, std::deque<Pairs>& winners,
+                std::deque<Losers>& losers);
+    void    sortDequePairsByMax(std::deque<Pairs>& pairs);
+    std::deque<Pairs> buildSequence(std::deque<Pairs>& winners,
+                std::deque<Pairs>& pending);
+    void    sortDeque();
+    void    buildMainAndPending(std::deque<ChainElement>& mainChain,
+                std::deque<int>& pending);
+    void    insertPending(std::deque<ChainElement>& mainChain,
+                std::deque<int>& pending);
+    void    executeDeque();
 public:
     PmergeMe();
     PmergeMe(const PmergeMe& other);
