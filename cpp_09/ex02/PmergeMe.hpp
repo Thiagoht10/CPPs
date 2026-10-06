@@ -39,8 +39,9 @@ private:
     std::deque<int> _deque;
 
     bool    parsing(char* argv[]) const;
-    bool    addNumbers(char* argv[]);
-    void    saveOriginalValues();
+    bool    addNumbersVector(char* argv[]);
+    bool    addNumbersDeque(char* argv[]);
+    void    saveOriginalValues(char* argv[]);
 
     void    sortVectorPairs();
     void    buildVectorPairs();

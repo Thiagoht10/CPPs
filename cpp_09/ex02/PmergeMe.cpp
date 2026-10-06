@@ -6,21 +6,26 @@
 #include <ctime>
 
 PmergeMe::PmergeMe()
+    : _vectorTime(0.0), _dequeTime(0.0)
 {}
 
 PmergeMe::PmergeMe(const PmergeMe& other)
-    : _beforeSort(other._beforeSort), _pairsVector(other._pairsVector), _vector(other._vector),
-    _deque(other._deque)
+    : _vectorTime(other._vectorTime), _dequeTime(other._dequeTime), 
+    _beforeSort(other._beforeSort), _pairsVector(other._pairsVector), 
+    _vector(other._vector), _pairsDeque(other._pairsDeque), _deque(other._deque)
 {}
 
 PmergeMe&   PmergeMe::operator=(const PmergeMe& other)
 {
     if (this != &other)
     {
-        _vector = other._vector;
-        _deque = other._deque;
+        _vectorTime = other._vectorTime;
+        _dequeTime = other._dequeTime;
         _beforeSort = other._beforeSort;
         _pairsVector = other._pairsVector;
+        _vector = other._vector;
+        _pairsDeque = other._pairsDeque;
+        _deque = other._deque;
     }
 
     return *this;
@@ -35,7 +40,6 @@ bool    PmergeMe::parsing(char* argv[]) const
     {
         std::stringstream ss(argv[i]);
         std::string token;
-        size_t pos;
 
         ss >> std::ws;
         if (ss.eof())
@@ -43,60 +47,92 @@ bool    PmergeMe::parsing(char* argv[]) const
         
         while (ss >> token)
         {
+
             if (token.find_first_of("-.") != std::string::npos)
                 return false;
 
-            for (size_t i = 0; i < token.size(); i++)
-            {
-                pos = token.find('+', i);
-                if (pos != std::string::npos && pos != 0)
-                    return false;
-            }
+            if (token.find('+', 1) != std::string::npos)
+                return false;
             
             for (size_t j = 0; j < token.size(); j++)
             {
                 if (!std::isdigit(token[j]) && token[j] != '+')
                     return false;
             }
+
+            if (ss.eof())
+                break;
         }
     }
 
     return true;
 }
 
-bool    PmergeMe::addNumbers(char* argv[])
+bool    PmergeMe::addNumbersVector(char* argv[])
 {
     for (size_t i = 1; argv[i]; i++)
     {
         std::stringstream ss(argv[i]);
         int number;
 
-        while (ss >> number)
-        {                
-            _vector.push_back(number);
-            _deque.push_back(number);
-
+        while (true)
+        {
+            ss >> std::ws;
+        
             if (ss.eof())
                 break;
+        
+            if (!(ss >> number) || number <= 0)
+                return false;
+        
+            _vector.push_back(number);
         }
-
-        if (ss.fail())
-            return false;
     }
 
     return true;
 }
 
-void    PmergeMe::saveOriginalValues()
+bool    PmergeMe::addNumbersDeque(char* argv[])
+{
+    for (size_t i = 1; argv[i]; i++)
+    {
+        std::stringstream ss(argv[i]);
+        int number;
+
+        while (true)
+        {
+            ss >> std::ws;
+        
+            if (ss.eof())
+                break;
+        
+            if (!(ss >> number) || number <= 0)
+                return false;
+        
+            _deque.push_back(number);
+        }
+    }
+
+    return true;
+}
+
+void    PmergeMe::saveOriginalValues(char* argv[])
 {
     std::stringstream ss;
-    size_t size = _vector.size();
 
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 1; argv[i]; i++)
     {
-        ss << _vector[i];
-        if (i < size - 1)
+        std::stringstream ssn(argv[i]);
+        int number;
+
+        while (ssn >> number)
+        {
+            ss << number;
             ss << " ";
+
+            if (ssn.eof())
+                break;
+        }
     }
 
     _beforeSort = ss.str();
@@ -638,18 +674,19 @@ void    PmergeMe::execute(char* argv[])
 
     if (!parsing(argv))
         throw std::runtime_error("invalid input");
-
-    if (!addNumbers(argv))
-        throw std::runtime_error("failure to add numbers");
-
-    saveOriginalValues();
+        
+    saveOriginalValues(argv);
 
     start = std::clock();
+    if (!addNumbersVector(argv))
+        throw std::runtime_error("failure to add numbers to the vector");
     executeVector();
     _vectorTime = static_cast<double>(std::clock() - start) 
         / CLOCKS_PER_SEC * 1000000.0;
 
     start = std::clock();
+    if (!addNumbersDeque(argv))
+        throw std::runtime_error("failure to add numbers to the deque");
     executeDeque();
     _dequeTime = static_cast<double>(std::clock() - start) 
         / CLOCKS_PER_SEC * 1000000.0;
