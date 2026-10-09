@@ -56,7 +56,9 @@ bool    PmergeMe::parsing(char* argv[]) const
             
             for (size_t j = 0; j < token.size(); j++)
             {
-                if (!std::isdigit(token[j]) && token[j] != '+')
+                unsigned char secureToken = static_cast<unsigned char>(token[j]);
+
+                if (!std::isdigit(secureToken) && token[j] != '+')
                     return false;
             }
 
@@ -119,6 +121,7 @@ bool    PmergeMe::addNumbersDeque(char* argv[])
 void    PmergeMe::saveOriginalValues(char* argv[])
 {
     std::stringstream ss;
+    bool first = true;
 
     for (size_t i = 1; argv[i]; i++)
     {
@@ -127,11 +130,11 @@ void    PmergeMe::saveOriginalValues(char* argv[])
 
         while (ssn >> number)
         {
+            if (!first)
+                ss << " ";
+        
             ss << number;
-            ss << " ";
-
-            if (ssn.eof())
-                break;
+            first = false;
         }
     }
 
@@ -700,13 +703,21 @@ void    PmergeMe::printAll()
 
     std::cout << "after: ";
     for (size_t i = 0; i < size; i++)
-        std::cout << _vector[i] << " ";
+    {
+        std::cout << _vector[i];
+        if (i + 1 < size)
+            std::cout << " ";
+    }
 
     std::cout << std::endl;
 
     /* std::cout << "deque: ";
     for (size_t i = 0; i < size; i++)
-        std::cout << _deque[i] << " ";
+    {
+        std::cout << _deque[i];
+        if (i + 1 < size)
+            std::cout << " ";
+    }
 
     std::cout << std::endl; */
 
