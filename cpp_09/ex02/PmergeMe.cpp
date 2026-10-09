@@ -236,8 +236,8 @@ std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
 {
     std::vector<Pairs> sequence(winners);
     sequence.insert(sequence.begin(), pending[0]);
+    size_t processed = 1;
 
-    // Inserir os demais pendentes em blocos de Jacobsthal.
     size_t processed = 1;
     size_t previousJacob = 1;
     size_t jacob = 3;
@@ -254,10 +254,8 @@ std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
             size_t index = position - 1;
             size_t limit = sequence.size();
 
-            // A sobra não tem vencedor: usa a cadeia inteira.
             if (index < winners.size())
             {
-                // Encontrar a posição atual do vencedor associado.
                 for (size_t j = 0; j < sequence.size(); j++)
                 {
                     if (sequence[j].id == winners[index].id)
@@ -268,7 +266,6 @@ std::vector<Pairs>  PmergeMe::buildSequence(std::vector<Pairs>& winners,
                 }
             }
 
-            // Buscar a posição de inserção antes do vencedor.
             size_t left = 0;
             size_t right = limit;
 
@@ -711,15 +708,6 @@ void    PmergeMe::printAll()
 
     std::cout << std::endl;
 
-    /* std::cout << "deque: ";
-    for (size_t i = 0; i < size; i++)
-    {
-        std::cout << _deque[i];
-        if (i + 1 < size)
-            std::cout << " ";
-    }
-
-    std::cout << std::endl; */
 
     std::cout << "Time to process a range of " << _vector.size()
           << " elements with std::vector : "
