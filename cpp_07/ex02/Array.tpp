@@ -15,13 +15,18 @@ Array<T>::Array(unsigned int n)
 
 template <typename T>
 Array<T>::Array(const Array& other)
+    : _array(new T[other._size]), _size(other._size)
 {
-    _size = other._size;
-
-    _array = new T[_size];
-
-    for (unsigned int i = 0; i < _size; i++)
-        _array[i] = other._array[i];
+    try
+    {
+        for (unsigned int i = 0; i < _size; i++)
+            _array[i] = other._array[i];
+    }
+    catch(...)
+    {
+        delete[] _array;
+        throw;
+    }
 }
 
 template <typename T>
@@ -29,12 +34,22 @@ Array<T>& Array<T>::operator=(const Array<T>& other)
 {
     if (this != &other)
     {
-        _size = other._size;
-        delete[] _array;
+        T* tmp = new T[other._size];
 
-        _array = new T[_size];
-        for (unsigned int i = 0; i < _size; i++)
-            _array[i] = other._array[i];
+        try
+        {
+            for (unsigned int i = 0; i < other._size; i++)
+                tmp[i] = other._array[i];
+        }
+        catch (...)
+        {
+            delete[] tmp;
+            throw;
+        }
+
+        delete[] _array;
+        _array = tmp;
+        _size = other._size;
     }
     return *this;
 }
@@ -48,10 +63,10 @@ Array<T>::~Array()
 template <typename T>
 T& Array<T>::operator[](unsigned int index)
 {
-    if (index < _size)
-        return _array[index];
+    if (index >= _size)
+        throw IndexOutBoundsException();
     
-    throw IndexOutBoundsException();
+    return _array[index];
 }
 
 template <typename T>

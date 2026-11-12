@@ -2,6 +2,8 @@ CXX = c++
 
 NAME = a.out
 
+DEPENDS = iter.hpp
+
 FLAGS = -Wall -Werror -Wextra -std=c++98
 
 SRC = main.cpp
@@ -13,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CXX) $(FLAGS) $(OBJ) -o $(NAME)
 
-%.o: %.cpp
+%.o: %.cpp $(DEPENDS)
 	$(CXX) $(FLAGS) -c $< -o $@
 
 clean:
