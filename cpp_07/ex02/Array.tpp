@@ -69,6 +69,15 @@ T& Array<T>::operator[](unsigned int index)
     return _array[index];
 }
 
+template<typename T>
+const T& Array<T>::operator[](unsigned int index) const
+{
+    if (index >= _size)
+        throw IndexOutBoundsException();
+
+    return _array[index];
+}
+
 template <typename T>
 unsigned int    Array<T>::size() const
 {
