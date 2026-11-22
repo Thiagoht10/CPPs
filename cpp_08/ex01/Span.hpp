@@ -25,13 +25,11 @@ public:
     template <typename Iterator>
     void    addNumber(Iterator begin, Iterator end)
     {
-        unsigned int amount = std::distance(begin, end);
-
-        if (_numbers.size() + amount > _sizeMax)
-            throw MaxSizeReachedException();
-
         while (begin != end)
         {
+            if (_numbers.size() + 1 > _sizeMax)
+                throw MaxSizeReachedException();
+                
             _numbers.push_back(*begin);
             ++begin;
         }

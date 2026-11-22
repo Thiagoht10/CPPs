@@ -50,6 +50,23 @@ int main()
 
     try
     {
+        std::vector<int> tmp;
+
+        tmp.push_back(7);
+        tmp.push_back(9);
+        tmp.push_back(5);
+
+        Span st(2);
+
+        st.addNumber(tmp.begin(), tmp.end());
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+    }
+
+    try
+    {
         Span st(1);
 
         st.longestSpan();
